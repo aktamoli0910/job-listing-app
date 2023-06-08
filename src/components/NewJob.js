@@ -13,6 +13,7 @@ import {
   Typography,
   makeStyles,
   IconButton,
+  CircularProgress,
 } from "@material-ui/core";
 
 import { Close as CloseIcon } from "@material-ui/icons";
@@ -40,9 +41,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NewJob() {
-  const [jobDetails, setJobDetails] = useState({
-    title: "",
+const initState = {
+  title: "",
     type: "Full Time",
     companyName: "",
     companyUrl: "",
@@ -50,7 +50,11 @@ function NewJob() {
     link: "",
     description: "",
     skills: [],
-  });
+}
+
+function NewJob(props) {
+  const [loading, setLoading] = useState(false);
+  const [jobDetails, setJobDetails] = useState(initState);
 
   const handleChange = (e) => {
     e.persist();
@@ -71,15 +75,28 @@ function NewJob() {
           skills: oldState.skills.concat(skill),
         }));
   };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    await props.postJob(jobDetails);
+    closeModal();
+  };
+
+  const closeModal = () => {
+    setJobDetails(initState)
+    setLoading(false)
+    props.closeModal();
+  }
+
   const classes = useStyles();
   const skills = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
   console.log(jobDetails);
   return (
-    <Dialog open="true" fullWidth>
+    <Dialog open={props.newJobModal} fullWidth>
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           Post Job
-          <IconButton>
+          <IconButton onClick={closeModal}>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -175,7 +192,9 @@ function NewJob() {
             {skills.map((skill) => (
               <Box
                 onClick={() => addRemoveSkill(skill)}
-                className={`${classes.skillChip} ${jobDetails.skills.includes(skill) && classes.included}`}
+                className={`${classes.skillChip} ${
+                  jobDetails.skills.includes(skill) && classes.included
+                }`}
                 key={skill}
               >
                 {skill}{" "}
@@ -193,8 +212,14 @@ function NewJob() {
           alignItems="center"
         >
           <Typography variant="caption">*Required Fields</Typography>
-          <Button variant="contained" disableElevation color="primary">
-            Post Job
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disableElevation
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? (<CircularProgress color = "secondary" size = {22} /> ) : ("POST JOB")}
           </Button>
         </Box>
       </DialogActions>

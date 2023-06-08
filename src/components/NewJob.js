@@ -78,6 +78,11 @@ function NewJob(props) {
 
   const handleSubmit = async () => {
     setLoading(true);
+    for(const field in jobDetails) {
+      if(typeof jobDetails[field] === 'string' && !jobDetails[field]) 
+      return
+    }
+    if (!jobDetails.skills.length) return;
     await props.postJob(jobDetails);
     closeModal();
   };
@@ -90,7 +95,6 @@ function NewJob(props) {
 
   const classes = useStyles();
   const skills = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"];
-  console.log(jobDetails);
   return (
     <Dialog open={props.newJobModal} fullWidth>
       <DialogTitle>
@@ -118,6 +122,7 @@ function NewJob(props) {
             <Select
               name="type"
               value={jobDetails.type}
+              onChange={handleChange}
               disableUnderline
               variant="filled"
               fullWidth
@@ -153,6 +158,7 @@ function NewJob(props) {
             <Select
               name="location"
               value={jobDetails.location}
+              onChange={handleChange}
               disableUnderline
               variant="filled"
               fullWidth
@@ -187,7 +193,7 @@ function NewJob(props) {
           </Grid>
         </Grid>
         <Box mt={2}>
-          <Typography>SKILLS</Typography>
+          <Typography>SKILLS*</Typography>
           <Box display="flex">
             {skills.map((skill) => (
               <Box

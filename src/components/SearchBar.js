@@ -1,5 +1,5 @@
-import React from "react";
-import {Box, Button, Select, MenuItem, makeStyles} from "@material-ui/core";
+import React, { useState } from "react";
+import { Box, Button, Select, MenuItem, makeStyles, CircularProgress } from "@material-ui/core";
 
 const useStyles = makeStyles({
   wrapper: {
@@ -13,23 +13,45 @@ const useStyles = makeStyles({
       margin: "8px",
     },
   },
-})
-export default () => {
+});
+export default (props) => {
+  const [loading, setLoading] = useState(false);
+  const [jobSearch, setJobSearch] = useState({
+    type: "Full Time",
+    location: "Remote",
+  });
+
+  const handleChange = (e) => {
+    e.persist();
+    setJobSearch((oldState) => ({
+      ...oldState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const search = async () => {
+    setLoading(true);
+    await props.fetchJobsCustom(jobSearch);
+    setLoading(false);
+  }
+
   const classes = useStyles();
   return (
-    <Box p={4} mt={-5 } mb={2} className={classes.wrapper}>
-        <Select disableUnderline variant="filled" defaultValue="Full Time">
-            <MenuItem value="Full Time">Full Time</MenuItem>
-            <MenuItem value="Part Time">Part Time</MenuItem>
-            <MenuItem value="Contract">Contract</MenuItem>
-        </Select>
+    <Box p={4} mt={-5} mb={2} className={classes.wrapper}>
+      <Select onChange={handleChange} name="type" value={jobSearch.type} disableUnderline variant="filled">
+        <MenuItem value="Full Time">Full Time</MenuItem>
+        <MenuItem value="Part Time">Part Time</MenuItem>
+        <MenuItem value="Contract">Contract</MenuItem>
+      </Select>
 
-        <Select disableUnderline variant="filled" defaultValue="Remote">
-            <MenuItem value="Remote">Remote</MenuItem>
-            <MenuItem value="In-Office">In Office</MenuItem>
-        </Select>
+      <Select onChange={handleChange} name="location" value={jobSearch.location} disableUnderline variant="filled">
+        <MenuItem value="Remote">Remote</MenuItem>
+        <MenuItem value="In-Office">In Office</MenuItem>
+      </Select>
 
-        <Button variant="contained" color="primary">Search</Button>
+      <Button onClick={search} disabled={loading} variant="contained" color="primary">
+      {loading ? (<CircularProgress color = "secondary" size = {22} /> ) : ("SEARCH")}
+      </Button>
     </Box>
-  )
-}
+  );
+};
